@@ -1041,8 +1041,8 @@ export function AnimatedAIChat() {
                         {!isSidebarOpen && (
                             <button
                                 onClick={() => setIsSidebarOpen(true)}
-                                className="p-1.5 rounded-lg transition-colors mr-1"
-                                style={{ color: 'var(--chat-text-secondary)' }}
+                                className="p-1.5 rounded-lg transition-colors mr-2 flex items-center justify-center hover:opacity-80"
+                                style={{ color: 'var(--chat-text)', background: 'var(--btn-secondary-bg)', border: '1px solid var(--btn-secondary-border)' }}
                                 title="Expand Sidebar"
                             >
                                 <Menu className="w-4 h-4" />
