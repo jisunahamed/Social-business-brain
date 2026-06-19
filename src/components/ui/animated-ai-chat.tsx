@@ -1085,7 +1085,7 @@ export function AnimatedAIChat() {
                 </div>
 
                 {/* Primary Chat Box Wrapper */}
-                <div className="flex-1 flex flex-col items-center justify-between p-6 z-10 w-full max-w-3xl mx-auto h-full relative">
+                <div className="flex-1 flex flex-col items-center justify-between p-6 z-10 w-full max-w-3xl mx-auto relative min-h-0">
                     <motion.div 
                         layout
                         className={cn(
