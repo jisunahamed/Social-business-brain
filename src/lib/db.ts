@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { supabaseAdmin as supabase } from './supabase';
 
 export interface DecryptedMessage {
   id: string;
@@ -30,8 +30,8 @@ export async function saveMessage(
     });
 
   if (error) {
-    console.error('Error saving message to Supabase:', error);
-    throw error;
+    console.error('Error saving message to Supabase:', error.message, error.code, error.details);
+    throw new Error(`Supabase insert error: ${error.message}`);
   }
 
   return {
@@ -52,7 +52,7 @@ export async function getMessagesDecrypted(sessionId: string): Promise<Decrypted
     .order('timestamp', { ascending: true });
 
   if (error) {
-    console.error('Error fetching messages from Supabase:', error);
+    console.error('Error fetching messages from Supabase:', error.message, error.code, error.details);
     return [];
   }
 
@@ -75,7 +75,7 @@ export async function deleteMessageAndSubsequent(msgId: string, sessionId: strin
     .order('timestamp', { ascending: true });
 
   if (fetchError || !messages) {
-    console.error('Error fetching messages for deletion:', fetchError);
+    console.error('Error fetching messages for deletion:', fetchError?.message, fetchError?.code);
     return;
   }
 
@@ -93,7 +93,7 @@ export async function deleteMessageAndSubsequent(msgId: string, sessionId: strin
       .in('id', idsToDelete);
 
     if (deleteError) {
-      console.error('Error deleting messages from Supabase:', deleteError);
+      console.error('Error deleting messages from Supabase:', deleteError.message, deleteError.code);
     }
   }
 }

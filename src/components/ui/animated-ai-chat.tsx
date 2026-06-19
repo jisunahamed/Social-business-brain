@@ -647,16 +647,21 @@ export function AnimatedAIChat() {
                         return updated;
                     });
 
-                    // Save updated title to Supabase
-                    fetch('/api/sessions', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            id: activeSessionId,
-                            title: newTitle,
-                            clientId
-                        })
-                    }).catch(console.error);
+                    // Ensure session exists in Supabase BEFORE sending the message
+                    // (the message insert will fail with FK violation if session doesn't exist)
+                    try {
+                        await fetch('/api/sessions', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                id: activeSessionId,
+                                title: newTitle,
+                                clientId
+                            })
+                        });
+                    } catch (err) {
+                        console.error("Failed to create session before first message:", err);
+                    }
                 }
             }
 
