@@ -231,6 +231,21 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
 )
 Textarea.displayName = "Textarea"
 
+function generateUUID(): string {
+    if (typeof window !== "undefined" && window.crypto && window.crypto.randomUUID) {
+        try {
+            return window.crypto.randomUUID();
+        } catch (e) {
+            // fallback
+        }
+    }
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
+
 export function AnimatedAIChat() {
     const [value, setValue] = useState("");
     const [attachments, setAttachments] = useState<string[]>([]);
@@ -303,12 +318,13 @@ export function AnimatedAIChat() {
     ];
 
 
-    // 0. Initialize Client ID
+    // 0. Initialize Client ID (must be a valid UUID for database uuid type compatibility)
     useEffect(() => {
         if (typeof window !== "undefined") {
             let id = localStorage.getItem("dazzling_faraday_client_id");
-            if (!id) {
-                id = `client-${Math.random().toString(36).substring(2, 15)}-${Math.random().toString(36).substring(2, 15)}`;
+            const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id || "");
+            if (!id || !isUUID) {
+                id = generateUUID();
                 localStorage.setItem("dazzling_faraday_client_id", id);
             }
             setClientId(id);
