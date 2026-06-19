@@ -1178,12 +1178,12 @@ export function AnimatedAIChat() {
                                                          strong: ({ node, ...props }) => <strong className="font-semibold" style={{ color: 'var(--chat-text)' }} {...props} />,
                                                          table: ({ node, ...props }) => (
                                                              <div className="overflow-x-auto my-3 rounded-lg border" style={{ borderColor: 'var(--code-border)', background: 'var(--code-bg)' }}>
-                                                                 <table className="min-w-full divide-y text-xs text-left" style={{ divideColor: 'var(--code-border)' }} {...props} />
+                                                                 <table className="min-w-full text-xs text-left" {...props} />
                                                              </div>
                                                          ),
                                                          thead: ({ node, ...props }) => <thead style={{ background: 'var(--sidebar-hover)' }} {...props} />,
-                                                         tbody: ({ node, ...props }) => <tbody className="divide-y" style={{ divideColor: 'var(--code-border)' }} {...props} />,
-                                                         tr: ({ node, ...props }) => <tr className="transition-colors hover:opacity-80" {...props} />,
+                                                         tbody: ({ node, ...props }) => <tbody {...props} />,
+                                                         tr: ({ node, ...props }) => <tr className="transition-colors hover:opacity-80 border-b last:border-b-0" style={{ borderColor: 'var(--code-border)' }} {...props} />,
                                                          th: ({ node, ...props }) => <th className="px-3 py-1.5 font-medium border-r last:border-r-0" style={{ color: 'var(--chat-text-muted)', borderColor: 'var(--code-border)' }} {...props} />,
                                                          td: ({ node, ...props }) => <td className="px-3 py-1.5 border-r last:border-r-0 align-top" style={{ color: 'var(--chat-text-secondary)', borderColor: 'var(--code-border)' }} {...props} />,
                                                          code: ({ node, className, children, ...props }) => {
