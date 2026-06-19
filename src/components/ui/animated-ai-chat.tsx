@@ -937,7 +937,7 @@ export function AnimatedAIChat() {
                             </div>
                             <button 
                                 onClick={() => setIsSidebarOpen(false)}
-                                className="p-1 rounded-md transition-colors"
+                                className="p-1 rounded-md transition-colors hover:opacity-80"
                                 style={{ color: 'var(--chat-text-muted)' }}
                             >
                                 <ChevronLeft className="w-4 h-4" />
@@ -963,7 +963,7 @@ export function AnimatedAIChat() {
                         {/* Sessions List & Coming Soon */}
                         <div className="flex-1 overflow-y-auto px-3 pb-4 space-y-6 custom-scrollbar">
                             <div className="space-y-1.5">
-                                <div className="text-[10px] font-semibold text-white/30 uppercase tracking-widest px-2.5 mb-2">Recent Chats</div>
+                                <div className="text-[10px] font-semibold uppercase tracking-widest px-2.5 mb-2" style={{ color: 'var(--chat-text-muted)' }}>Recent Chats</div>
                                 {sessions.map((session) => (
                                     <div
                                         key={session.id}
@@ -989,7 +989,8 @@ export function AnimatedAIChat() {
                                         </div>
                                         <button
                                             onClick={(e) => handleDeleteSession(e, session.id)}
-                                            className="opacity-0 group-hover:opacity-100 p-1 hover:bg-white/10 rounded text-white/40 hover:text-white transition-all duration-200"
+                                            className="opacity-0 group-hover:opacity-100 p-1 rounded transition-all duration-200 hover:opacity-80"
+                                            style={{ color: 'var(--chat-text-muted)', background: 'var(--sidebar-hover)' }}
                                             title="Delete/Close Session"
                                         >
                                             <Trash2 className="w-3.5 h-3.5" />
@@ -1008,7 +1009,8 @@ export function AnimatedAIChat() {
                                     {comingSoonItems.map((item) => (
                                         <div
                                             key={item.name}
-                                            className="group flex items-center justify-between px-3 py-1.5 rounded-xl text-xs text-white/40 border border-transparent hover:bg-white/[0.02] hover:text-white/75 transition-all duration-200 cursor-default"
+                                            className="group flex items-center justify-between px-3 py-1.5 rounded-xl text-xs transition-all duration-200 cursor-default hover:opacity-80"
+                                            style={{ color: 'var(--chat-text-secondary)', border: '1px solid transparent' }}
                                         >
                                             <div className="flex items-center gap-2 overflow-hidden">
                                                 <div className={cn(
@@ -1017,7 +1019,8 @@ export function AnimatedAIChat() {
                                                 )} />
                                                 <span className="truncate">{item.name}</span>
                                             </div>
-                                            <span className="text-[8px] font-medium px-1.5 py-0.5 rounded bg-white/[0.03] border border-white/[0.04] text-white/20 group-hover:text-violet-400 group-hover:border-violet-500/25 transition-all">
+                                            <span className="text-[8px] font-medium px-1.5 py-0.5 rounded transition-all group-hover:text-violet-400 group-hover:border-violet-500/25"
+                                                  style={{ background: 'var(--badge-bg)', border: '1px solid var(--badge-border)', color: 'var(--chat-text-muted)' }}>
                                                 Soon
                                             </span>
                                         </div>
