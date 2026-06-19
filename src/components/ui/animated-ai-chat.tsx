@@ -193,7 +193,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       )}>
         <textarea
           className={cn(
-            "flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm",
+            "flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm",
             "transition-all duration-200 ease-in-out",
             "placeholder:text-muted-foreground",
             "disabled:cursor-not-allowed disabled:opacity-50",
@@ -241,8 +241,8 @@ export function AnimatedAIChat() {
     const [recentCommand, setRecentCommand] = useState<string | null>(null);
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const { textareaRef, adjustHeight } = useAutoResizeTextarea({
-        minHeight: 60,
-        maxHeight: 200,
+        minHeight: 36,
+        maxHeight: 140,
     });
     const [inputFocused, setInputFocused] = useState(false);
     const commandPaletteRef = useRef<HTMLDivElement>(null);
@@ -1081,14 +1081,14 @@ export function AnimatedAIChat() {
                                         placeholder="Ask SB Brain a question..."
                                         containerClassName="w-full"
                                         className={cn(
-                                            "w-full px-4 py-2.5",
+                                            "w-full px-4 py-2",
                                             "resize-none",
                                             "bg-transparent",
                                             "border-none",
                                             "text-white/90 text-sm",
                                             "focus:outline-none",
                                             "placeholder:text-white/20",
-                                            "min-h-[50px]",
+                                            "min-h-[36px]",
                                             "custom-scrollbar"
                                         )}
                                         showRing={false}
