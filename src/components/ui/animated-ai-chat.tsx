@@ -251,6 +251,8 @@ export function AnimatedAIChat() {
     const [sessions, setSessions] = useState<Session[]>([]);
     const [activeSessionId, setActiveSessionId] = useState<string>("");
     const [clientId, setClientId] = useState<string>("");
+    const [sharedParentId, setSharedParentId] = useState<string | null>(null);
+    const [shareCopied, setShareCopied] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     
     // Live messages state loaded from encrypted backend db based on activeSessionId
@@ -318,6 +320,29 @@ export function AnimatedAIChat() {
         if (!clientId) return;
 
         const loadSessions = async () => {
+            // Check if there is a shared session in the URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const sharedSessionId = urlParams.get('share');
+
+            if (sharedSessionId) {
+                setSharedParentId(sharedSessionId);
+                setActiveSessionId(sharedSessionId);
+                
+                // Fetch the user's regular sessions in the background to populate the sidebar
+                try {
+                    const response = await fetch(`/api/sessions?clientId=${clientId}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.sessions) {
+                            setSessions(data.sessions);
+                        }
+                    }
+                } catch (error) {
+                    console.error("Failed to load sessions in background:", error);
+                }
+                return;
+            }
+
             try {
                 const response = await fetch(`/api/sessions?clientId=${clientId}`);
                 if (response.ok) {
@@ -545,39 +570,78 @@ export function AnimatedAIChat() {
         }
     };
 
-    const handleSendMessage = () => {
+    const handleSendMessage = async () => {
         const messageToSend = value.trim();
         if (messageToSend && activeSessionId) {
             setValue("");
             adjustHeight(true);
 
-            // Auto-rename session based on the first message
-            if (messages.length === 0) {
-                const words = messageToSend.split(/\s+/).filter(Boolean);
-                const newTitle = words.length > 3 
-                    ? words.slice(0, 3).join(" ") + "..." 
-                    : messageToSend;
-                
-                setSessions(prev => {
-                    const updated = prev.map(s => {
-                        if (s.id === activeSessionId) {
-                            return { ...s, title: newTitle };
-                        }
-                        return s;
-                    });
-                    return updated;
-                });
+            let currentSessionId = activeSessionId;
 
-                // Save updated title to Supabase
-                fetch('/api/sessions', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        id: activeSessionId,
-                        title: newTitle,
-                        clientId
-                    })
-                }).catch(console.error);
+            // If we are previewing a shared session, clone it to a new session for the user first
+            if (sharedParentId) {
+                const newId = `session-${Date.now()}`;
+                const newSession: Session = {
+                    id: newId,
+                    title: sessions.find(s => s.id === sharedParentId)?.title || "Shared Chat Copy",
+                    createdAt: new Date().toISOString()
+                };
+
+                // Add to local sessions list
+                setSessions(prev => [...prev, newSession]);
+                setActiveSessionId(newId);
+                localStorage.setItem("dazzling_faraday_active_session", newId);
+                
+                // Clear shared parent state and clean URL
+                setSharedParentId(null);
+                currentSessionId = newId;
+
+                const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+                window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
+
+                // Call clone API to copy the session and its messages in the database
+                try {
+                    await fetch('/api/sessions/clone', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            parentSessionId: sharedParentId,
+                            newSessionId: newId,
+                            clientId: clientId
+                        })
+                    });
+                } catch (error) {
+                    console.error("Failed to clone session in database:", error);
+                }
+            } else {
+                // Auto-rename session based on the first message
+                if (messages.length === 0) {
+                    const words = messageToSend.split(/\s+/).filter(Boolean);
+                    const newTitle = words.length > 3 
+                        ? words.slice(0, 3).join(" ") + "..." 
+                        : messageToSend;
+                    
+                    setSessions(prev => {
+                        const updated = prev.map(s => {
+                            if (s.id === activeSessionId) {
+                                return { ...s, title: newTitle };
+                            }
+                            return s;
+                        });
+                        return updated;
+                    });
+
+                    // Save updated title to Supabase
+                    fetch('/api/sessions', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            id: activeSessionId,
+                            title: newTitle,
+                            clientId
+                        })
+                    }).catch(console.error);
+                }
             }
 
             // Add user message locally for instant UI response
@@ -599,7 +663,7 @@ export function AnimatedAIChat() {
                         },
                         body: JSON.stringify({ 
                             message: messageToSend,
-                            sessionId: activeSessionId,
+                            sessionId: currentSessionId,
                             clientId
                         }),
                     });
@@ -683,6 +747,17 @@ export function AnimatedAIChat() {
                 return copy;
             }
             return { ...prev, [id]: type };
+        });
+    };
+
+    const handleShare = () => {
+        if (!activeSessionId) return;
+        const shareUrl = `${window.location.origin}?share=${activeSessionId}`;
+        navigator.clipboard.writeText(shareUrl).then(() => {
+            setShareCopied(true);
+            setTimeout(() => setShareCopied(false), 2000);
+        }).catch(err => {
+            console.error("Failed to copy share link:", err);
         });
     };
 
@@ -866,13 +941,19 @@ export function AnimatedAIChat() {
                         <span>Books & Workshop</span>
                         <span>/</span>
                         <span className="text-white/80 font-medium truncate max-w-[180px] sm:max-w-[280px]">
-                            {sessions.find(s => s.id === activeSessionId)?.title || "Supercommunicators chapter structure and breakdown"}
+                            {sharedParentId 
+                                ? "Shared Chat (Preview)" 
+                                : (sessions.find(s => s.id === activeSessionId)?.title || "Supercommunicators chapter structure and breakdown")
+                            }
                         </span>
                         <span className="text-[10px] opacity-60">▼</span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <button className="px-3 py-1 bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.05] rounded-lg text-xs text-white/70 hover:text-white transition-colors">
-                            Share
+                        <button 
+                            onClick={handleShare}
+                            className="px-3 py-1 bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.05] rounded-lg text-xs text-white/70 hover:text-white transition-colors"
+                        >
+                            {shareCopied ? "Copied!" : "Share"}
                         </button>
                     </div>
                 </div>
