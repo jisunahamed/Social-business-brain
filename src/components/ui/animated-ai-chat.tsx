@@ -290,31 +290,11 @@ export function AnimatedAIChat() {
     const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const sendTimestampRef = useRef<number>(0);
 
-    // Initialize theme from system preference or localStorage
+    // Initialize theme — force light mode to match the HTML template
     useEffect(() => {
         if (typeof window === 'undefined') return;
-        const stored = localStorage.getItem('dazzling_faraday_theme') as 'dark' | 'light' | null;
-        if (stored) {
-            setTheme(stored);
-            document.documentElement.setAttribute('data-theme', stored);
-        } else {
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            const systemTheme = prefersDark ? 'dark' : 'light';
-            setTheme(systemTheme);
-            document.documentElement.setAttribute('data-theme', systemTheme);
-        }
-
-        // Listen for system preference changes
-        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        const handler = (e: MediaQueryListEvent) => {
-            if (!localStorage.getItem('dazzling_faraday_theme')) {
-                const newTheme = e.matches ? 'dark' : 'light';
-                setTheme(newTheme);
-                document.documentElement.setAttribute('data-theme', newTheme);
-            }
-        };
-        mediaQuery.addEventListener('change', handler);
-        return () => mediaQuery.removeEventListener('change', handler);
+        setTheme('light');
+        document.documentElement.setAttribute('data-theme', 'light');
     }, []);
 
     const toggleTheme = () => {
