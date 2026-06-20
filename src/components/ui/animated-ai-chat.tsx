@@ -896,7 +896,7 @@ export function AnimatedAIChat() {
     };
 
     return (
-        <div className="d-flex">
+        <div className="d-flex h-full w-full overflow-hidden">
             {/* Mobile overlay */}
             <div 
                 className={`sbb-sidebar-overlay ${isSidebarOpen ? 'show' : ''}`} 
